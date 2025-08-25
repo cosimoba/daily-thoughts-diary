@@ -49,7 +49,7 @@ export default function RegisterPage() {
               to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              sign in to existing account
+              sign in to an existing account
             </Link>
           </p>
         </div>
