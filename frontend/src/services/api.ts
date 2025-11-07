@@ -14,12 +14,12 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('auth-storage');
-    if (token) {
+    const authStorage = localStorage.getItem('auth-storage');
+    if (authStorage) {
       try {
-        const authData = JSON.parse(token);
-        if (authData?.state?.token) {
-          config.headers.Authorization = `Bearer ${authData.state.token}`;
+        const authData = JSON.parse(authStorage);
+        if (authData?.state?.accessToken) {
+          config.headers.Authorization = `Bearer ${authData.state.accessToken}`;
         }
       } catch (error) {
         console.error('Error parsing auth token:', error);

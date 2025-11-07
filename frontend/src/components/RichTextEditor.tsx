@@ -1,16 +1,39 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { 
-  BoldIcon, 
-  ItalicIcon, 
-  UnderlineIcon,
+import {
   CodeBracketIcon,
   ListBulletIcon,
-  NumberedListIcon,
-  QuoteIcon,
   PhotoIcon,
-  LinkIcon
+  LinkIcon,
+  Bars3BottomLeftIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+
+// Custom icon components for missing heroicons
+const BoldIcon = (props: any) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6V4zm0 8h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6v-8z" />
+  </svg>
+);
+
+const ItalicIcon = (props: any) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 4h8M8 20h8m-3-16-4 16" />
+  </svg>
+);
+
+const UnderlineIcon = (props: any) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 20h12M8 4v8a4 4 0 0 0 8 0V4" />
+  </svg>
+);
+
+const NumberedListIcon = (props: any) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h1v4m0 0H4m1 0h1m-2 5h2m-2 3h2m2-8h10M9 18h10" />
+  </svg>
+);
+
+const QuoteIcon = Bars3BottomLeftIcon;
 
 interface RichTextEditorProps {
   value: string;

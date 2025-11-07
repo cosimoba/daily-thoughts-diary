@@ -1,12 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { body, query, validationResult } from 'express-validator';
-import { PrismaClient, TagCategory } from '@prisma/client';
+import { body, validationResult } from 'express-validator';
+import { TagCategory } from '@prisma/client';
+import { prisma } from '../index';
 import NLPService from '../services/nlpService';
 import TagService from '../services/tagService';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
 const nlpService = new NLPService(prisma);
 const tagService = new TagService(prisma);
 
@@ -16,7 +16,7 @@ const handleValidationErrors = (req: Request, res: Response, next: NextFunction)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  next();
+  return next();
 };
 
 /**
@@ -343,13 +343,13 @@ router.post(
       const cached = await nlpService.getFromCache(text, language);
       
       if (cached) {
-        res.json({
+        return res.json({
           success: true,
           cached: true,
           data: cached
         });
       } else {
-        res.json({
+        return res.json({
           success: true,
           cached: false,
           data: null
@@ -357,7 +357,7 @@ router.post(
       }
     } catch (error) {
       console.error('Cache retrieval error:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: 'Failed to retrieve cached analysis'
       });
@@ -372,18 +372,18 @@ router.post(
 router.delete(
   '/cache',
   authenticateToken,
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       // In production, add admin check here
       await nlpService.cleanCache();
       
-      res.json({
+      return res.json({
         success: true,
         message: 'Cache cleared successfully'
       });
     } catch (error) {
       console.error('Cache clear error:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: 'Failed to clear cache'
       });
@@ -448,7 +448,7 @@ router.post(
       // Get full tag details
       const tags = await tagService.getEntryTags(entryId);
       
-      res.json({
+      return res.json({
         success: true,
         data: {
           tags,
@@ -457,7 +457,7 @@ router.post(
       });
     } catch (error) {
       console.error('Auto-tagging error:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: 'Failed to auto-tag entry'
       });

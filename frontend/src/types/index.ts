@@ -120,8 +120,8 @@ export interface RegisterCredentials {
 
 export interface AuthResponse {
   user: User;
-  token: string;
-  refreshToken?: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 // API Response types

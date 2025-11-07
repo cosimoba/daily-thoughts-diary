@@ -5,11 +5,12 @@ import api from '@/services/api';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<void>;
@@ -23,7 +24,8 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
+      accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -35,15 +37,16 @@ export const useAuthStore = create<AuthState>()(
             email,
             password,
           });
-          
-          const { user, token } = response.data;
-          
+
+          const { user, accessToken, refreshToken } = response.data;
+
           // Set token in API client
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+          api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
           set({
             user,
-            token,
+            accessToken,
+            refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -51,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           set({
             isLoading: false,
-            error: error.response?.data?.message || 'Login failed',
+            error: error.response?.data?.error || error.response?.data?.message || 'Login failed',
             isAuthenticated: false,
           });
           throw error;
@@ -66,15 +69,16 @@ export const useAuthStore = create<AuthState>()(
             username,
             password,
           });
-          
-          const { user, token } = response.data;
-          
+
+          const { user, accessToken, refreshToken } = response.data;
+
           // Set token in API client
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+          api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
           set({
             user,
-            token,
+            accessToken,
+            refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -82,7 +86,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           set({
             isLoading: false,
-            error: error.response?.data?.message || 'Registration failed',
+            error: error.response?.data?.error || error.response?.data?.message || 'Registration failed',
             isAuthenticated: false,
           });
           throw error;
@@ -92,10 +96,11 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         // Clear token from API client
         delete api.defaults.headers.common['Authorization'];
-        
+
         set({
           user: null,
-          token: null,
+          accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           error: null,
         });
@@ -115,17 +120,17 @@ export const useAuthStore = create<AuthState>()(
       },
 
       checkAuth: async () => {
-        const token = get().token;
-        if (!token) {
-          set({ isAuthenticated: false });
+        const accessToken = get().accessToken;
+        if (!accessToken) {
+          set({ isAuthenticated: false, isLoading: false });
           return;
         }
 
         set({ isLoading: true });
         try {
           // Set token in API client
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+          api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
           const response = await api.get<{ user: User }>('/auth/me');
           set({
             user: response.data.user,
@@ -134,6 +139,7 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           // Token is invalid or expired
+          console.error('Auth check failed:', error);
           get().logout();
           set({ isLoading: false });
         }
@@ -143,7 +149,8 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }
